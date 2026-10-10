@@ -214,3 +214,11 @@ Repeat the same command to resume; completed runs are verified by SHA-256. Faile
 The fixed 3,180-run plan contains 240 development references, 1,800 numeric endpoint variants, 300 disabled-switch variants, 540 categorical/speed/length variants, 120 validation references and 180 predefined combined stress cases. Numeric and selection sweeps use the slowdown profile on all three roads; Wavespeed parameters use Wavespeed, and stop-detector ablations use the stop profile. Default values are provided by the matched reference run. Development seeds are 1001–1020; validation seeds are 9001–9010. The experiment plan and full configurations are saved before computation.
 
 Outputs: per-run JSON, gzip-compressed 10 Hz time-series CSV, model metrics, paired comparisons, grouped aggregates, seed-cluster bootstrap intervals, invariance checks and a Markdown report. Source snapshots and checksums are included. GUI playback is bypassed. Data are synthetic; raw 100 Hz three-axis IMU streams are not stored. Generated data are excluded from Git.
+
+Create the Turkish interpretation and portable sortable results page after generation:
+
+```sh
+python3 scripts/dataset-summary.py ./data/tunnel-dataset-v1 ./data/analysis
+```
+
+The control audit explicitly distinguishes unchanged output from failed wiring. In the first full dataset the Kalman ZUPT ablation was unchanged in all 60 development stop scenarios because no true stops were flagged by C; this is a limitation to investigate rather than a passed effectiveness claim.
