@@ -4,7 +4,9 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {SimpleKF} from '../dist/simple-kf.js';
 import {diag,quadratic} from '../dist/math.js';
-import {runSimulation} from '../dist/simulation.js';
+import {runSimulation,CONFIG} from '../dist/simulation.js';
+import {World} from '../dist/world.js';
+import {makeRoad} from '../dist/road.js';
 const map={project:f=>({s:f.s,cross:0})};
 
 test('C reproduces constant-acceleration kinematics and quadratic residual-bias drift',()=>{
@@ -55,11 +57,13 @@ test('C reacquisition rejects outliers and recovers with consistent GNSS rather 
  assert.equal(f.phase,'open');assert.ok(f.x[0]>470);
 });
 
-test('Adding C preserves every pre-existing Truth/A/B sample and summary in seven reference runs',()=>{
+test('The distance-based path preserves the seven historical results with identical 180 s sensor history',()=>{
  const fixtures=JSON.parse(readFileSync(new URL('./fixtures/legacy-results.json',import.meta.url)));
  for(const {settings,sha256} of fixtures){
-  const r=runSimulation(settings),rows=r.rows.map(({c,cU,...legacy})=>legacy);
-  const {c,...calibration}=r.calibration,summary={a:r.summary.a,b:r.summary.b,recovery:{a:r.summary.recovery.a,b:r.summary.recovery.b}};
+  // Convert the old 180 s fixture into its equivalent measured approach distance.
+  const cfg={...CONFIG,...settings},world=new World(makeRoad(cfg.road,cfg.length),cfg);for(let i=0;i<1800;i++)world.frame(true);
+  const r=runSimulation({...settings,preTunnelLength:world.s+200}),rows=r.rows.map(({c,cU,...legacy})=>legacy);
+  const {c,length,...calibration}=r.calibration,summary={a:r.summary.a,b:r.summary.b,recovery:{a:r.summary.recovery.a,b:r.summary.recovery.b}};
   assert.equal(createHash('sha256').update(JSON.stringify({rows,summary,calibration})).digest('hex'),sha256,JSON.stringify(settings));
  }
 });

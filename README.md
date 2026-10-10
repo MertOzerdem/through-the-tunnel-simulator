@@ -190,3 +190,9 @@ Bu uygulama Codex ile, kullanıcının sağladığı çözüm belgesinden üreti
 ## Interface language
 
 English is the default. Use the EN / TR selector at the top to switch languages without resetting the current simulation or settings. Turkish text is preserved. JSON exports include the selected display language.
+
+## Adjustable calibration road
+
+The pre-tunnel open-road slider spans 250–6,000 m (default 4,200 m). The final 200 m is the entrance approach; the preceding physical drive replaces the fixed hidden 180 s warm-up. At default speed and seed it records about 181 s of GNSS/IMU data with acceleration and braking for excitation. Actual duration depends on speed and driver motion. Readiness uses the existing covariance and excitation checks, not a duration threshold; longer calibration does not guarantee smaller tunnel errors.
+
+Calibration playback shows ground truth only. Filters initialise by replaying the completed calibration recording; no retrospectively calibrated estimates are shown as online results during that recording. Skip calibration jumps playback forward without removing training data. Insufficient calibration disables fusion M1 and Kalman IMU input. Summary errors still cover only the tunnel. CSV time zero remains the end of the calibration recording; displayed elapsed time also includes calibration. During calibration, changing target speed starts a new run. The original seven numerical references are checked at their equivalent 180 s approach distances.

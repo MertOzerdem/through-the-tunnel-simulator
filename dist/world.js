@@ -58,8 +58,9 @@ export class Phone{
 export function calibrate(frames){let up=[0,0,0],forward=[0,0,0],count=0,gyro=[0,0,0];const windows=[];
  for(let i=0;i<frames.length;i++)for(let j=0;j<3;j++)gyro[j]+=frames[i].w[j]/frames.length;
  for(let i=10;i<frames.length;i++){const e=frames[i],prev=frames[i-10];if(!e.fix||!prev.fix)continue;const dv=e.fix.v-prev.fix.v,mean=[0,0,0];for(let k=i-9;k<=i;k++)for(let j=0;j<3;j++)mean[j]+=frames[k].f[j]/10;windows.push({dv,mean});if(Math.abs(dv)<.3)up=add(up,mean);}
- up=unit(up);
+ if(norm(up)<1e-6)up=frames.reduce((v,f)=>add(v,f.f),[0,0,0]);up=unit(up);
  for(const {dv,mean} of windows)if(Math.abs(dv)>.5){const horiz=add(mean,scale(up,-dot(mean,up)));forward=add(forward,scale(horiz,dv));count++;}
+ if(norm(forward)<1e-6)forward=add([1,0,0],scale(up,-up[0]));
  const yp=unit(cross(up,unit(forward))),xp=unit(cross(yp,up)),btheta=dot(yp,gyro)-EARTH*Math.cos(LAT)*Math.cos(frames.find(f=>f.fix)?.fix.course??0);
  return {up,xp,yp,btheta,qualifying:count};
 }

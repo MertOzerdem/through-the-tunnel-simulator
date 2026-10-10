@@ -1,5 +1,6 @@
 // Numeric experiment inputs. SI is used by the engine; speed settings are km/h.
 export const PARAMETERS=[
+ {key:'preTunnelLength',group:'calibration',label:'Tünel öncesi açık yol',min:250,max:6000,step:50,value:4200,unit:'m',digits:0,help:'Kalibrasyon için hızlanma ve frenleme uygulanır; son 200 m giriş yaklaşımıdır. Süre gerçek hızdan hesaplanır.'},
  {key:'waveAmplitude',group:'driver',label:'Wavespeed · aralık ±',min:0,max:35,step:1,value:15,unit:'km/h',digits:0,wave:true,help:'Başlangıç hızının çevresinde hedef hız sınırı; 10–130 km/h içinde.'},
  {key:'waveDiffusion',group:'driver',label:'Wavespeed · değişim şiddeti',min:0,max:8,step:.25,value:3,unit:'km/h/√s',digits:2,wave:true,help:'Random walk adımı σ√Δt. Büyüdükçe hedef hız daha hızlı değişir.'},
  {key:'driverSigma',group:'driver',label:'Truth · sürücü sapması σD',min:0,max:3,step:.1,value:1,unit:'m/s',digits:1,help:'Doğal hız sapması. A’nın analitik modeli σD = 1 m/s varsaymaya devam eder.'},
