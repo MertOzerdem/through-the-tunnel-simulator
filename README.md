@@ -200,3 +200,17 @@ Calibration playback shows ground truth only. Filters initialise by replaying th
 Each estimate card shows Peak |error|: the largest absolute along-track error since estimation began, up to the current playback time (including open-road approach and recovery). Rewinding restores the historical peak; calibration has no estimate and displays a dash. The run summary remains tunnel-only.
 
 Calibration playback automatically runs at 128×, then restores the selected normal playback rate at the calibration boundary. This changes presentation timing only; every physical sensor sample and filter update is still computed.
+
+## Headless dataset generation
+
+Requires Node.js 24 (tested) and no npm dependencies. Run from the repository root:
+
+```sh
+node scripts/dataset.js --out ./data/tunnel-dataset-v1 --workers 4
+```
+
+Repeat the same command to resume; completed runs are verified by SHA-256. Failed or corrupt runs are retried. A different plan or code version requires a new output directory. For a smoke test, use a separate directory with `--limit 2`; do not reuse that directory for the full plan. `--report-only` regenerates reports only after integrity checks pass.
+
+The fixed 3,180-run plan contains 240 development references, 1,800 numeric endpoint variants, 300 disabled-switch variants, 540 categorical/speed/length variants, 120 validation references and 180 predefined combined stress cases. Numeric and selection sweeps use the slowdown profile on all three roads; Wavespeed parameters use Wavespeed, and stop-detector ablations use the stop profile. Default values are provided by the matched reference run. Development seeds are 1001–1020; validation seeds are 9001–9010. The experiment plan and full configurations are saved before computation.
+
+Outputs: per-run JSON, gzip-compressed 10 Hz time-series CSV, model metrics, paired comparisons, grouped aggregates, seed-cluster bootstrap intervals, invariance checks and a Markdown report. Source snapshots and checksums are included. GUI playback is bypassed. Data are synthetic; raw 100 Hz three-axis IMU streams are not stored. Generated data are excluded from Git.

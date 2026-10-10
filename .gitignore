@@ -4,3 +4,5 @@ dist/standalone.html
 node_modules/
 .env
 .env.*
+
+data/
