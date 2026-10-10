@@ -20,6 +20,10 @@ Testler Node.js 18+ ile:
 node --test tests/*.test.js
 ```
 
+## Görünen model adları
+
+Arayüzde gösterim sırası: Gerçek araç → Sabit hız (A) → İvme takibi · Kalman (C) → Gelişmiş sensör füzyonu · IMM-EKF (B). Kartlar, grafik çizim sırası, legend ve özet aynı sıradadır. Sayısal motor, renkler ve A/B/C veri anahtarları korunur; CSV sütunları A/C/B sırasındadır, JSON model adlarını ve sırasını ayrıca taşır. Sıra karmaşıklık artışını anlatır; her koşuda aynı hata sıralamasını garanti etmez.
+
 ## Kullanım
 
 Masaüstü uygulamasıdır (minimum yerleşim genişliği 1120 px). Mobil optimizasyon yapılmaz. Hız ve tünel uzunluğu slider’ları üstteki “Deneme kontrolleri” panelindedir; panel sayfayla birlikte kayar.
