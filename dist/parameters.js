@@ -11,11 +11,13 @@ export const PARAMETERS=[
  {key:'sigmaU',group:'filter',label:'B · IMU ölçüm σu',min:.03,max:.5,step:.01,value:.1,unit:'m/s²',digits:2,help:'Filtrenin varsaydığı R = σu². Küçük değer ivme ölçümüne daha çok güven verir.'},
  {key:'qbetaScale',group:'filter',label:'B · qβ çarpanı',min:.1,max:10,step:.1,value:1,unit:'×',digits:1,help:'Telefon önayarının bias süreç gürültüsünü çarpar. Truth drift’inden bağımsızdır.'},
  {key:'sigmaM',group:'filter',label:'B · manevra ivmesi σa',min:.5,max:3,step:.1,value:1.5,unit:'m/s²',digits:1,help:'IMM manevra modelinin süreç belirsizliği; truth ivmesini değiştirmez.'},
- {key:'headingSigma',group:'filter',label:'B · harita yönü σψ',min:.5,max:5,step:.25,value:1.5,unit:'°',digits:2,help:'M5 ölçüm gürültüsü ve G5 belirsiz eğri kontrolünün yön toleransı.'}
+ {key:'headingSigma',group:'filter',label:'B · harita yönü σψ',min:.5,max:5,step:.25,value:1.5,unit:'°',digits:2,help:'M5 ölçüm gürültüsü ve G5 belirsiz eğri kontrolünün yön toleransı.'},
+ {key:'cSigmaU',group:'cfilter',label:'C · IMU giriş σu',min:.03,max:.5,step:.01,value:.15,unit:'m/s²',digits:2,help:'Tek KF’nin ivme giriş belirsizliği. B’nin ayarlarını değiştirmez.'},
+ {key:'cQbiasScale',group:'cfilter',label:'C · bias süreç çarpanı',min:.1,max:10,step:.1,value:1,unit:'×',digits:1,help:'qᵦ = 1.5e−5 × çarpan m²/s⁵. Düz tünelde yeni ölçüm yoksa bias öğrenilemez.'}
 ];
 export const parameterDefaults=()=>Object.fromEntries(PARAMETERS.map(p=>[p.key,p.value]));
 export function validateParameters(cfg){
  for(const p of PARAMETERS)if(!Number.isFinite(cfg[p.key])||cfg[p.key]<p.min||cfg[p.key]>p.max)throw Error('Geçersiz parametre: '+p.key);
- for(const key of ['useM1','useM5','useM6','useM7'])if(typeof cfg[key]!=='boolean')throw Error('Geçersiz filtre seçimi');
+ for(const key of ['useM1','useM5','useM6','useM7','useCZupt'])if(typeof cfg[key]!=='boolean')throw Error('Geçersiz filtre seçimi');
  if(![3.84,6.63,10.83].includes(cfg.nisGate))throw Error('Geçersiz NIS kapısı');
 }

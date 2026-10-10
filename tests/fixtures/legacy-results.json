@@ -1,0 +1,57 @@
+[
+  {
+    "settings": {},
+    "sha256": "fde428171a6e80b3c6f928c67dea34622c2844b047194e33669f17f5aebc7d92"
+  },
+  {
+    "settings": {
+      "profile": "wavespeed"
+    },
+    "sha256": "143f8239ecacfffe232283142fbdfa73e53d0417d0099d90c02976a41f4ee998"
+  },
+  {
+    "settings": {
+      "road": "straight",
+      "profile": "stop"
+    },
+    "sha256": "97a2df281bc8477d95f8ae44c312c8c357c23c7d088b76abbdc47ada9569b184"
+  },
+  {
+    "settings": {
+      "road": "curve",
+      "length": 500
+    },
+    "sha256": "d4f76317c34e68791ff06043d7291f33c52cb6991e139563a918b8d4164c9fcd"
+  },
+  {
+    "settings": {
+      "road": "straight",
+      "length": 5000
+    },
+    "sha256": "e5970884caf364a93202b0c1c6540a572e503483c805080d558d5c8e24fdebd5"
+  },
+  {
+    "settings": {
+      "phone": "poor",
+      "useM1": false,
+      "useM5": false
+    },
+    "sha256": "d79c2c444f3ec0d69309e7256fae72dcba0c622b3fd308001b76c3f704c92a20"
+  },
+  {
+    "settings": {
+      "profile": "steady",
+      "speedChanges": [
+        {
+          "at": 30,
+          "speed": 30
+        },
+        {
+          "at": 65,
+          "speed": 110
+        }
+      ]
+    },
+    "sha256": "e549af16e58638bba028938ed3530cf7593727497ff36c9b13e5b811b0340f3f"
+  }
+]

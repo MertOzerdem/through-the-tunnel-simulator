@@ -1,6 +1,6 @@
 # Through the Tunnel · Simulation Lab
 
-Tarayıcıda çalışan, bağımlılıksız ilk sürüm. Tek araç / tek şerit / çatalsız yol. Üç geometri: düz, tek viraj ve S. Yalnızca truth, Approach A ve Approach B uygulanır. PDF’teki tüm platform/altyapı modüllerinin eksiksiz uygulaması değildir; aşağıdaki sınırlar bilinçli olarak açık tutulmuştur.
+Tarayıcıda çalışan, bağımlılıksız ilk sürüm. Tek araç / tek şerit / çatalsız yol. Üç geometri: düz, tek viraj ve S. Truth, Approach A, Approach B ve Approach C uygulanır. PDF’teki tüm platform/altyapı modüllerinin eksiksiz uygulaması değildir; aşağıdaki sınırlar bilinçli olarak açık tutulmuştur.
 
 ## Çalıştırma
 
@@ -74,7 +74,7 @@ Yansıtma iki sınıra uygulanır; clamp gibi sınırda birikme yaratmaz. Aralı
 
 ### Konuşulacak deneyler
 
-1. Wavespeed aralığını ±25 km/h, diffusion’u 5 yapın; aynı seed ile A/B hatalarını ve B manevra olasılığını karşılaştırın.
+1. Wavespeed aralığını ±25 km/h, diffusion’u 5 yapın; aynı seed ile A/B/C hatalarını ve B manevra olasılığını karşılaştırın.
 2. Aynı koşuyu S ve düz tünelde çalıştırın; M5’i kapatarak harita yönünün katkısını ayırın.
 3. Truth drift’ini yükseltin, qβ’yı sabit bırakın; sonra sadece qβ’yı değiştirin. Model ile gerçek sensör uyuşmazlığını ve belirsizlik kapsamını tartışın.
 4. IMU gürültüsünü yükseltip σu’yu düşük bırakın; sonra σu’yu artırın. Her değişimde aynı seed’i koruyun.
@@ -137,13 +137,43 @@ Cruise tau=3 s, sigma_a²=qdrv/(2tau), qdrv=.0333333. Manoeuvre tau=4 s, sigma_a
 - GNSS cuttings, complete blackout, lognormal tracking/fix lag ve ilk üç noisy fix modellenir. Dört phase: open / degraded / tunnel / recovery.
 - Map ikonları Eq 2.16 ile yumuşatılır; ham state’e göre grafik ve metrik hesaplanır. ±2sigma bandı B’nin ham state’ini temsil eder.
 
+### C · 1D IMU + tek Kalman filtresi
+
+`simple-kf.js`: bağımsız doğrusal KF, `x=[s,v,b]`. A/B kodu ve sonuçları korunur. Ortak montaj kalibrasyonu yalnız geçmişteki ham IMU/GNSS’ten gelir. C kendi `Preprocessor`, kovaryans, GNSS geçmişi, readiness ve 0.3 s GNSS gecikme/replay tamponunu tutar. B’nin durumunu, beta’sını veya ayarlarını okumaz. C’ye truth hızı/konumu, sürücü hedefi, stop bayrağı veya çıkış zamanı verilmez.
+
+```text
+s_next = s + v dt + 0.5 (u - b) dt²
+v_next = v + (u - b) dt
+b_next = b + random_walk
+F = [[1,dt,-0.5dt²], [0,1,-dt], [0,0,1]]
+G = [0.5dt², dt, 0]ᵀ
+Q_acc = sigma_u² G Gᵀ
+Q_bias = q_b [[dt⁵/20,dt⁴/8,-dt³/6],
+              [dt⁴/8,dt³/3,-dt²/2],
+              [-dt³/6,-dt²/2,dt]]
+```
+
+10 Hz; varsayılan σu=0.15 m/s², q_b=1.5e-5 m²/s⁵. İvme giriş belirsizliği, 0.1 s aralığındaki ortalama ivmenin standart sapmasıdır. Bias random walk kovaryansı sürekli modelin tam integrali ve çapraz terimleriyle kullanılır. Joseph ölçüm güncellemesi; ileri sürüş sınırında negatif hız ve geriye konum artışı sıfıra projekte edilir. Bu sınır, tespit edilmiş duruş anlamına gelmez. Kovaryans bu sınırda yeniden daraltılmaz.
+
+180 s açık gökyüzü kaydı GNSS hızıyla bias’ı öğrenir. Giriş readiness: σv≤0.3 m/s, σb≤0.03 m/s² ve en az 20 qualifying kalibrasyon örneği. Sağlanmazsa IMU kapalı kıyı modeli ve daha geniş süreç belirsizliğiyle devam eder; sonraki fix tek başına IMU’yu yeniden açmaz. Bias’ı durum olarak tutmak, yardımsız tünelde onu gözleyebilmek anlamına gelmez.
+
+- GNSS hız: 1 Hz, R=2 max(0.1, speedAccuracy)². GNSS konum: açık gökyüzünde 10 s’de bir, R=6 max(accuracy,3)²; recovery’de her fix, α=1. NIS sabit 6.63; B NIS kontrolünden bağımsızdır.
+- GNSS kalite kontrolleri: açıkta accuracy≤20 m, degraded≤10 m, recovery≤15 m; sat≥6; cross-track≤max(3 accuracy,10). Üç tutarlı reddedilmiş recovery fix’i global yeniden başlatabilir. Bu ölçüm/GNSS mekanizması C’ye aittir.
+- İsteğe bağlı ZUPT: en az 5 ardışık 10 Hz karede tf<0.08 m/s², tw<0.3°/s, tahmini v<0.5 m/s ve σv<0.5 m/s. Ölçüm v=0, R=0.05². Yeni hareket, ivme veya gyro artışı duruşu sonlandırır. Sezici muhafazakârdır: bias/hız kayması büyüyünce gerçek duruş kaçabilir. Sakin IMU, sabit hızlı hareketi tek başına duruştan ayıramaz.
+- IMM, heading/curvature ölçümü ve portal düzeltmesi yoktur. Harita yalnız along-track koordinatı ekrana taşır ve GNSS’i rotaya izdüşürür. Yol üstünde görünmek boyuna hatayı düzeltmez.
+- İki ayrı slider: `cSigmaU` (0.03–0.5 m/s²), `cQbiasScale` (0.1–10×). `useCZupt` yalnız C’yi etkiler. Birim seçimi, harita/legend, grafikler, canlı hız komutları, özet ve CSV/JSON C’yi içerir.
+
+Sabit kalıntı ivme sapması `delta_s≈0.5 b t²` büyür. C’nin A’dan her koşulda iyi olması beklenmez; uzun sabit hızlı tünelde A daha iyi olabilir. Varsayılan dur-kalk kaydında C’nin muhafazakâr ZUPT’yi kaçırması ve hatanın büyümesi görünür bir sınırlamadır. Daha büyük q_b ölçüm yerine geçmez. Ortak ön işlemdeki tutum/pitch hataları da C’nin bu basit bias modeliyle tamamen giderilmez. ±2σ koşullu model belirsizliğidir, bütün model hatalarını kapsama garantisi değildir.
+
 ## Bilinçli sınırlar
 
 Bu ilk sürüm yatay 2-D road geometry, sabit tutucu ve phone-only ölçümlere odaklanır. Adaptif qdrv/qbeta/innovation learning, tam online 2-state pitch-bias learner, mount knock monitor, gerçek platform API emülasyonu, sensor clock jitter/dropouts, detaylı thermal drift, height/grade profile, barometre, beacon, vehicle speed, traffic IDM, Monte Carlo UI, branch logic ve callout scheduler dahil değildir. Veri indirme ekranında single-run sonuçlar açıkça belirtilir; istatistiksel timing/recovery başarı iddiası yapılmaz. Özellikle uzun düz yolda slow speed drift ve bias ayrılamaz; coverage tek bir koşuda dürüst kovaryans kanıtı değildir.
 
 ## Doğrulama
 
-16 sayısal test: Eq 6.2 bilinen sayılar, IMM propagation ve Markov normalization, Joseph symmetry/PSD, ortak NIS gate, portal heading/curvature continuity, 1 m arc length, G5 ambiguous S rejection, bit-for-bit seed replay, canlı hız komutundan önceki tüm örneklerin birebir korunması, jerk ile sürekli hız tepkisi, sensör üzerinden frenleme takibi, otomatik profilin manuel komutla değiştirilmesi, geçersiz komutların reddi, sensor-based standstill ve 500/5000 m × 3 yol × 3 sürüş profili sayısal sağlamlığı. Ek kontroller: Wavespeed determinism/sınırlar/jerk, sıfır aralık limiti, canlı komutla geçmişin korunması, tüm B ayarlarından truth ve A’nın bağımsızlığı, dört güncellemenin ayrı ablation testi, tüm teknik parametrelerin iki uç değerinde sonlu hesaplama ve 5 km düşük hızlı/gürültülü stres senaryosu. Tarayıcıda yalnızca masaüstü: Wavespeed, slider değişimleri, M1 anahtarı, birim dönüşümü, playback, scrub ve tek dosya Worker kontrol edilir.
+23 sayısal test: Eq 6.2 bilinen sayılar, IMM propagation ve Markov normalization, Joseph symmetry/PSD, ortak NIS gate, portal heading/curvature continuity, 1 m arc length, G5 ambiguous S rejection, bit-for-bit seed replay, canlı hız komutundan önceki tüm örneklerin birebir korunması, jerk ile sürekli hız tepkisi, sensör üzerinden frenleme takibi, otomatik profilin manuel komutla değiştirilmesi, geçersiz komutların reddi, sensor-based standstill ve 500/5000 m × 3 yol × 3 sürüş profili sayısal sağlamlığı. Ek kontroller: Wavespeed determinism/sınırlar/jerk, sıfır aralık limiti, canlı komutla geçmişin korunması, tüm B ayarlarından truth ve A’nın bağımsızlığı, dört güncellemenin ayrı ablation testi, tüm teknik parametrelerin iki uç değerinde sonlu hesaplama ve 5 km düşük hızlı/gürültülü stres senaryosu. Tarayıcıda yalnızca masaüstü: Wavespeed, slider değişimleri, M1 anahtarı, birim dönüşümü, playback, scrub ve tek dosya Worker kontrol edilir.
+
+C doğrulaması: sabit ivme ve b·t² hatası, GNSS’ten bias öğrenme, Joseph PSD, snapshot/replay, muhafazakâr ZUPT/kapama, kötü GNSS reddi ve tutarlı recovery, tüm yol/profillerde sonluluk, C↔B ayar bağımsızlığı ve yedi C öncesi koşunun SHA-256 referansıyla Truth/A/B örneklerinin ve özetlerinin birebir korunması. Eski referanslar `tests/fixtures/legacy-results.json` içindedir.
 
 ## Dosyalar
 
@@ -151,4 +181,4 @@ Bu ilk sürüm yatay 2-D road geometry, sabit tutucu ve phone-only ölçümlere 
 
 ## AI kullanımı
 
-Bu uygulama Codex ile, kullanıcının sağladığı çözüm belgesinden üretildi. Kapsamı kullanıcı tek şerit, çatalsız üç geometri ve A/B olarak daralttı. Uygulamada GNSS gecikmesi replay, ölçüm kapıları ve truth/sensor ayrımı özellikle doğrulandı. Sadeleştirmeler yukarıda açıkça listelenmiştir; gerçek telefon verisiyle kalibrasyon ve consistency doğrulaması yapılmamıştır.
+Bu uygulama Codex ile, kullanıcının sağladığı çözüm belgesinden üretildi. Kapsamı kullanıcı tek şerit, çatalsız üç geometri ve A/B olarak daralttı; sonrasında bağımsız bir C (1D IMU + tek KF) istedi. Uygulamada GNSS gecikmesi replay, ölçüm kapıları ve truth/sensor ayrımı özellikle doğrulandı. Sadeleştirmeler yukarıda açıkça listelenmiştir; gerçek telefon verisiyle kalibrasyon ve consistency doğrulaması yapılmamıştır.

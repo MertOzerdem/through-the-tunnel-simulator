@@ -28,7 +28,7 @@ test('Sensor-based standstill freezes B while A keeps coasting',()=>{
  const r=runSimulation({profile:'stop'}),stopped=r.rows.filter(x=>x.v<.1&&x.s>0),detected=stopped.filter(x=>x.b.stationary);assert.ok(stopped.length>300);assert.ok(detected.length/stopped.length>.9);assert.ok(detected.every(x=>x.b.v<.1));assert.ok(stopped.every(x=>x.a.v>15));assert.ok(r.summary.a.peak>1000);
 });
 test('All geometry/profile combinations remain finite over the configured length range',()=>{
- for(const road of ['s','curve','straight'])for(const length of [500,5000])for(const profile of ['steady','slowdown','stop']){const r=runSimulation({road,length,profile});assert.ok(r.exitTime>r.entryTime);assert.ok(r.rows.at(-1).s>length);for(const row of r.rows){for(const k of ['a','b']){assert.ok(Number.isFinite(row[k].s));assert.ok(Number.isFinite(row[k].sigma));assert.ok(row[k].v>=0);}assert.ok(row.b.mu>=0&&row.b.mu<=1);}}
+ for(const road of ['s','curve','straight'])for(const length of [500,5000])for(const profile of ['steady','slowdown','stop']){const r=runSimulation({road,length,profile});assert.ok(r.exitTime>r.entryTime);assert.ok(r.rows.at(-1).s>length);for(const row of r.rows){for(const k of ['a','b','c']){assert.ok(Number.isFinite(row[k].s));assert.ok(Number.isFinite(row[k].sigma));assert.ok(row[k].v>=0);}assert.ok(row.b.mu>=0&&row.b.mu<=1);}}
 });
 test('Live speed commands preserve the full past and change truth continuously through IMU',()=>{
  const settings={profile:'steady'},before=runSimulation(settings),speedChanges=[{at:30,speed:30},{at:65,speed:110}],after=runSimulation({...settings,speedChanges});
@@ -88,9 +88,9 @@ test('Exposed numeric ranges stay finite at every endpoint and reject invalid in
  const {PARAMETERS}=await import('../dist/parameters.js');
  for(const p of PARAMETERS)for(const value of [p.min,p.max]){
   const r=runSimulation({profile:'wavespeed',length:500,[p.key]:value});assert.ok(r.exitTime>r.entryTime,p.key);
-  for(const row of r.rows)assert.ok([row.s,row.v,row.b.s,row.b.sigma,row.b.beta].every(Number.isFinite),p.key);
+  for(const row of r.rows)assert.ok([row.s,row.v,row.b.s,row.b.sigma,row.b.beta,row.c.s,row.c.v,row.c.sigma,row.c.beta].every(Number.isFinite),p.key);
  }
  const stress=runSimulation({profile:'wavespeed',road:'straight',length:5000,speed:30,waveAmplitude:35,waveDiffusion:8,driverSigma:3,noiseScale:4,accBiasMg:30,driftScale:5,gnssSigma:15,gnssSpeedSigma:1,qbetaScale:10});
- assert.ok(stress.exitTime>stress.entryTime);assert.ok(stress.rows.every(r=>[r.b.s,r.b.sigma,r.b.v].every(Number.isFinite)));
+ assert.ok(stress.exitTime>stress.entryTime);assert.ok(stress.rows.every(r=>[r.b.s,r.b.sigma,r.b.v,r.c.s,r.c.sigma,r.c.v].every(Number.isFinite)));
  assert.throws(()=>runSimulation({noiseScale:NaN}),/Geçersiz parametre/);assert.throws(()=>runSimulation({useM5:0}),/Geçersiz filtre/);assert.throws(()=>runSimulation({nisGate:0}),/Geçersiz NIS/);
 });
