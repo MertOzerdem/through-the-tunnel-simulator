@@ -1,6 +1,8 @@
 // Turkish originals are retained; English is the default presentation language.
 export let language='en';
 export const EN={
+ "Tepe |hata|":"Peak |error|",
+ "Kalibrasyon sonrası, seçili ana kadar görülen en büyük mutlak konum hatası. Tünel özeti yalnız tünel içini kapsar.":"Largest absolute position error since estimation began, up to the selected time. The run summary covers the tunnel only.",
  "Kalibrasyonu geç →":"Skip calibration →",
 "Tünel öncesi kalibrasyon":"Pre-tunnel calibration","Tünel öncesi açık yol":"Pre-tunnel open road","Kalibrasyon için hızlanma ve frenleme uygulanır; son 200 m giriş yaklaşımıdır. Süre gerçek hızdan hesaplanır.":"Acceleration and braking excite calibration; the final 200 m is the entrance approach. Duration follows actual speed.","Kalibrasyon sonunda:":"At calibration end:","Kalibrasyon sürüşü":"Calibration drive","Kalibrasyon":"Calibration","GNSS + IMU kaydı · modeller kalibrasyon tamamlanınca başlar":"Recording GNSS + IMU · models start after calibration","Kalibrasyon tamamlanınca grafikler başlar":"Charts start after calibration","GNSS kalibrasyonu:":"GNSS calibration:","uygun hız değişimi:":"qualifying speed changes:","Füzyon:":"Fusion:","Kalman:":"Kalman:",
  "GPS yok. Yol devam ediyor.": "GPS fades. The journey continues.",
