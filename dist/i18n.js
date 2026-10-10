@@ -1,6 +1,7 @@
 // Turkish originals are retained; English is the default presentation language.
 export let language='en';
 export const EN={
+ "128× · Kalibrasyon":"128× · Calibration",
  "Tepe |hata|":"Peak |error|",
  "Kalibrasyon sonrası, seçili ana kadar görülen en büyük mutlak konum hatası. Tünel özeti yalnız tünel içini kapsar.":"Largest absolute position error since estimation began, up to the selected time. The run summary covers the tunnel only.",
  "Kalibrasyonu geç →":"Skip calibration →",
