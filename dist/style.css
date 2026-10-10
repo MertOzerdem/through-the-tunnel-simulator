@@ -12,3 +12,5 @@ body{min-width:1120px}.workspace{grid-template-columns:310px minmax(0,1fr)}.setu
 :root{--c:#287fa6}.approach-c{background:var(--c)}.cmetric .metricvalue{color:var(--c)}.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.metric{padding:14px 12px}.metriclabel{flex-wrap:wrap;gap:5px}.metriclabel>span{font-size:6px}.metricvalue{font-size:23px}.metricfoot{flex-wrap:wrap;gap:4px}.cstatus{display:flex;align-items:center;gap:15px;margin-top:12px;padding:11px 17px;border:1px solid var(--line);border-radius:8px;background:white;font-size:9px;color:#82988d}.cstatus>span:first-child{color:var(--c);font-family:var(--mono)}.cstatus b{color:#4a7487;font-weight:500}.cstatus>span:last-child{margin-left:auto}.legend{gap:12px}
 
 .maplegend{max-width:calc(100% - 200px);flex-wrap:wrap;row-gap:6px}.cstatus{margin-bottom:12px}
+
+.languagecontrol{display:flex;align-items:center;gap:8px;margin-left:auto}.languagecontrol label{font-size:10px;color:#7a8b80}.languagecontrol select{width:125px;padding:8px;font-size:11px}.topbar #aboutBtn{margin-left:0}

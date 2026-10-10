@@ -8,6 +8,7 @@ worker='\n'.join(re.sub(r'^import .*?;\s*$', '', (dist/name).read_text(), flags=
 config=re.search(r'export const CONFIG=(.*?);', (dist/'simulation.js').read_text()).group(1)
 parameter_source=(dist/'parameters.js').read_text().replace('export ','')
 app=(dist/'app.js').read_text().replace("import {PARAMETERS} from './parameters.js';",parameter_source).replace("import {CONFIG} from './simulation.js';", 'const CONFIG='+config+';')
+app=app.replace("import {translate,locale,language,initLanguage} from './i18n.js';", (dist/'i18n.js').read_text().replace('export ',''))
 app=app.replace("new Worker('worker.js',{type:'module'})", "new Worker(workerURL,{type:'module'})")
 boot='const workerURL=URL.createObjectURL(new Blob(['+json.dumps(worker)+'],{type:"text/javascript"}));\n'
 html=(dist/'index.html').read_text().replace('<link rel="stylesheet" href="style.css">','<style>'+(dist/'style.css').read_text()+'</style>')

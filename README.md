@@ -186,3 +186,7 @@ C doğrulaması: sabit ivme ve b·t² hatası, GNSS’ten bias öğrenme, Joseph
 ## AI kullanımı
 
 Bu uygulama Codex ile, kullanıcının sağladığı çözüm belgesinden üretildi. Kapsamı kullanıcı tek şerit, çatalsız üç geometri ve A/B olarak daralttı; sonrasında bağımsız bir C (1D IMU + tek KF) istedi. Uygulamada GNSS gecikmesi replay, ölçüm kapıları ve truth/sensor ayrımı özellikle doğrulandı. Sadeleştirmeler yukarıda açıkça listelenmiştir; gerçek telefon verisiyle kalibrasyon ve consistency doğrulaması yapılmamıştır.
+
+## Interface language
+
+English is the default. Use the EN / TR selector at the top to switch languages without resetting the current simulation or settings. Turkish text is preserved. JSON exports include the selected display language.
