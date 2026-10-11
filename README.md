@@ -8,15 +8,23 @@ A dependency-free, browser-based simulator for vehicle positioning during a GNSS
 
 ## Running locally
 
-Prerequisites for running locally: a working Python 3 installation. Tests additionally require Node.js 18 or newer. Check your versions with `python3 --version` and `node --version`.
+The `npx serve` option needs Node.js and npm/npx. Tests require Node.js 18 or newer.
 
-From the project directory, using Python 3:
+From the project directory:
+
+```sh
+npx serve dist -l 4183
+```
+
+Then open [http://localhost:4183](http://localhost:4183). The first run may download the `serve` package through npx.
+
+Alternatively, with Python 3:
 
 ```sh
 python3 -m http.server 4173 --directory dist
 ```
 
-Open http://localhost:4173. If port 4173 is already in use, choose another port in the command and URL (for example, 4183). The modular `index.html` uses ES modules and a Worker, so it must be served over HTTP rather than opened through `file://`. No installation or build step is required. Fonts are optionally loaded from Google Fonts; system fonts are used when the network is unavailable.
+Open [http://localhost:4173](http://localhost:4173). The modular `index.html` uses ES modules and a Worker, so it must be served over HTTP rather than opened through `file://`. No build step is required. Fonts are optionally loaded from Google Fonts; system fonts are used when the network is unavailable.
 
 On macOS, if the system Python reports an Xcode license error, use a separately installed Python 3 or complete the Xcode setup before retrying. If Node reports `bad option: --test`, switch to Node.js 18 or newer.
 
