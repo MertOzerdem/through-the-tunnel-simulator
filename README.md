@@ -48,6 +48,6 @@ Vertical dashed lines mark live command times in the charts; the gray dashed lin
 
 ## Exit callout
 
-The exit is the tunnel end. Each model independently calls it out when its raw along-track position first reaches 90% of tunnel length (10% remaining). This is a distance-based demonstration policy, not a validated real-world warning distance. The vehicle continues along the single lane; an internal exit or branch is not simulated.
+The exit is the tunnel end. Each model independently calls it out when its raw along-track position first reaches 80% of tunnel length (20% remaining). This is a distance-based demonstration policy, not a validated real-world warning distance. The vehicle continues along the single lane; an internal exit or branch is not simulated.
 
 The live event table and run summary record ground truth and all three estimators: elapsed callout time, timing error versus ground truth (negative = early), and actual remaining distance to the exit. Events latch once at 10 Hz; missing events remain explicit. JSON includes the event records and CSV marks the triggering frame. Callouts never feed back into the estimators or driver.

@@ -14,7 +14,7 @@ export const EN={
 "ANONS":"CALLOUT",
 "İÇ ÇIKIŞ":"INTERNAL EXIT",
 "Anons zamanı koşu başlangıcından itibaren saniyedir. Negatif fark erken, pozitif fark geç anons demektir. Kayıtlar 10 Hz’de ilk eşik geçişinde tutulur; geri sarınca yalnız seçili ana kadar olanlar gösterilir.":"Callout time is in seconds from the start of the run. Negative offsets mean early; positive offsets mean late. Events are recorded at the first threshold crossing at 10 Hz. Rewinding shows only events up to the selected time.",
-"Bu sürümde çıkış, tünel sonudur; anons eşiği tünelin %90 noktasındadır. Anons, her modelin ham boyuna konumunun eşik geçişiyle tetiklenir ve filtreye ölçüm sağlamaz. Dallanma ve şerit değiştirme modellenmez.":"The exit is the tunnel end; the callout threshold is at 90% of tunnel length. Each model triggers its callout using its raw along-track estimate. The callout supplies no measurement to the filters. Branching and lane changes are not modelled.",
+"Bu sürümde çıkış, tünel sonudur; anons eşiği tünelin %80 noktasındadır. Anons, her modelin ham boyuna konumunun eşik geçişiyle tetiklenir ve filtreye ölçüm sağlamaz. Dallanma ve şerit değiştirme modellenmez.":"The exit is the tunnel end; the callout threshold is at 80% of tunnel length. Each model triggers its callout using its raw along-track estimate. The callout supplies no measurement to the filters. Branching and lane changes are not modelled.",
 
  "128× · Kalibrasyon":"128× · Calibration",
  "Tepe |hata|":"Peak |error|",
