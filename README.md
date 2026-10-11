@@ -52,10 +52,3 @@ Speed changes are stored as `{at: seconds, speed: km/h}` events. A Web Worker re
 
 Vertical dashed lines mark live command times in the charts; the gray dashed line in the speed chart shows target speed. The run summary reports tunnel-wide RMSE, peak error, the proportion of estimates within ±50 m, and coverage of the reported ±2σ interval. It also lists live command times. CSV exports contain raw estimates, sensor channels, `truth_a_mps2`, and `target_speed_kmh`. Scenario JSON exports preserve settings, commands, and the summary.
 
-**Quick interview experiment:** Select Cruise, 80 km/h, and a 2 km tunnel. At 30 seconds into the tunnel, change the target to 40 km/h. About 20 seconds later, discuss why Constant speed continues at its entry speed while Advanced sensor fusion follows braking through sensor measurements. Then set the target to 100 km/h and inspect the maneuver probability. Repeat with a 5 km straight tunnel and an S-shaped tunnel using the same seed.
-
-## Exit callout
-
-The exit is the tunnel end. Each model independently calls it out when its raw along-track position first reaches 80% of tunnel length (20% remaining). This is a distance-based demonstration policy, not a validated real-world warning distance. The vehicle continues along the single lane; an internal exit or branch is not simulated.
-
-The live event table and run summary record ground truth and all three estimators: elapsed callout time, timing error versus ground truth (negative = early), and actual remaining distance to the exit. Events latch once at 10 Hz; missing events remain explicit. JSON includes the event records and CSV marks the triggering frame. Callouts never feed back into the estimators or driver.
