@@ -1,6 +1,21 @@
 // Turkish originals are retained; English is the default presentation language.
 export let language='en';
 export const EN={
+"Çıkış anonsu":"Exit callout",
+"Anons eşiği":"Callout threshold",
+"Çıkış konumu":"Exit position",
+"Model":"Model",
+"Anons zamanı":"Callout time",
+"Erken / geç":"Early / late",
+"Gerçek kalan mesafe":"Actual distance remaining",
+"Tetiklenmedi":"Not triggered",
+"Bekleniyor":"Pending",
+"Çıkış geçildi":"Exit already passed",
+"ANONS":"CALLOUT",
+"İÇ ÇIKIŞ":"INTERNAL EXIT",
+"Anons zamanı koşu başlangıcından itibaren saniyedir. Negatif fark erken, pozitif fark geç anons demektir. Kayıtlar 10 Hz’de ilk eşik geçişinde tutulur; geri sarınca yalnız seçili ana kadar olanlar gösterilir.":"Callout time is in seconds from the start of the run. Negative offsets mean early; positive offsets mean late. Events are recorded at the first threshold crossing at 10 Hz. Rewinding shows only events up to the selected time.",
+"Bu sürümde çıkış, tünel sonudur; anons eşiği tünelin %90 noktasındadır. Anons, her modelin ham boyuna konumunun eşik geçişiyle tetiklenir ve filtreye ölçüm sağlamaz. Dallanma ve şerit değiştirme modellenmez.":"The exit is the tunnel end; the callout threshold is at 90% of tunnel length. Each model triggers its callout using its raw along-track estimate. The callout supplies no measurement to the filters. Branching and lane changes are not modelled.",
+
  "128× · Kalibrasyon":"128× · Calibration",
  "Tepe |hata|":"Peak |error|",
  "Kalibrasyon sonrası, seçili ana kadar görülen en büyük mutlak konum hatası. Tünel özeti yalnız tünel içini kapsar.":"Largest absolute position error since estimation began, up to the selected time. The run summary covers the tunnel only.",

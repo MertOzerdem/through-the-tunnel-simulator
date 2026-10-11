@@ -1,3 +1,4 @@
+import {ExitCalloutRecorder} from './exit-callout.js';
 import {parameterDefaults,validateParameters} from './parameters.js';
 import {RAD,diag} from './math.js';
 import {makeRoad,makeMap} from './road.js';
@@ -34,6 +35,7 @@ export function runSimulation(settings={},progress=()=>{}){
  // Warm-up GNSS latency is cleared at the presentation boundary by dropping undelivered fixes; processed estimates are retained.
  harness.queue=[];harness.buffer=[];harnessC.queue=[];harnessC.buffer=[];
  const slowest=Math.min(cfg.profile==='wavespeed'?Math.max(10,cfg.speed-cfg.waveAmplitude):cfg.speed,...commands.map(e=>e.speed)),rows=[],maxSeconds=cfg.length/(slowest/3.6)*2+240;let entryTime=null,exitTime=null;
+ const callouts=new ExitCalloutRecorder(cfg.length),calloutFrames=[];
  progress(.25);
  for(let i=0;i<Math.ceil(maxSeconds*10);i++){
   // Command at t applies to the next 10 Hz frame. Recomputing preserves every earlier sample.
@@ -41,12 +43,14 @@ export function runSimulation(settings={},progress=()=>{}){
   const raw=world.frame(),e=pre.step(raw,map.at(est.b.output().x[0]).psi),sensor=phone.event(raw,i);result=harness.step({...e,...sensor});const ec=preC.step(raw,map.at(simple.x[0]).psi);resultC=harnessC.step({...ec,...sensor});
   if(raw.s>=0&&entryTime===null)entryTime=raw.t;if(raw.s>=cfg.length&&exitTime===null)exitTime=raw.t;
   rows.push({t:raw.t,s:raw.s,v:raw.v,truthAcceleration:raw.a,yaw:raw.yaw,target:world.lastTarget*3.6,...result,c:resultC,cU:ec.u,u:e.u,omega:e.omega,sat:sensor.sat,gnss:!!sensor.fix});
+  calloutFrames.push(callouts.step(rows.at(-1)));
   if(i%300===0)progress(.25+.7*Math.min(1,raw.s/cfg.length));
   if(exitTime!==null&&raw.t>exitTime+18)break;
  }
  const inside=rows.filter(r=>r.s>=0&&r.s<=cfg.length),summary={};
  for(const key of ['a','b','c']){const errors=inside.map(r=>r[key].s-r.s),squares=errors.map(e=>e*e);summary[key]={rmse:Math.sqrt(squares.reduce((a,b)=>a+b,0)/errors.length),peak:Math.max(...errors.map(Math.abs)),coverage:inside.filter(r=>Math.abs(r[key].s-r.s)<=2*r[key].sigma).length/inside.length,within50:errors.filter(e=>Math.abs(e)<=50).length/errors.length};}
+ summary.exitCallout=callouts.summary(warmSeconds,entryTime);
  const final=rows.at(-1);summary.recovery={a:Math.abs(final.a.s-final.s),b:Math.abs(final.b.s-final.s),c:Math.abs(final.c.s-final.s)};
  const calibrationRows=warm.map(f=>({t:f.t-warmSeconds,s:f.s,v:f.v,target:f.target,phase:'calibration'}));
- progress(1);return{cfg,calibrationRows,rows,summary,entryTime,exitTime,duration:final.t,road:road.pts.filter((_,i)=>i%4===0||i===cfg.length),mapPoints:Array.from({length:Math.floor((cfg.length+500)/4)+1},(_,i)=>map.at(-250+i*4)),calibration:{seconds:warmSeconds,length:cfg.preTunnelLength,qualifying:alignment.qualifying,ready:readiness,m1Enabled,sigmaBeta:Math.sqrt(entryCov[21]),replays:harness.replays,c:cEntry},endGates:final.gates};
+ progress(1);return{cfg,calibrationRows,rows,calloutFrames,summary,entryTime,exitTime,duration:final.t,road:road.pts.filter((_,i)=>i%4===0||i===cfg.length),mapPoints:Array.from({length:Math.floor((cfg.length+500)/4)+1},(_,i)=>map.at(-250+i*4)),calibration:{seconds:warmSeconds,length:cfg.preTunnelLength,qualifying:alignment.qualifying,ready:readiness,m1Enabled,sigmaBeta:Math.sqrt(entryCov[21]),replays:harness.replays,c:cEntry},endGates:final.gates};
 }

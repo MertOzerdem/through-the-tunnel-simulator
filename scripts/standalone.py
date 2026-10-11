@@ -3,7 +3,7 @@ from pathlib import Path
 import re, json, sys
 root=Path(__file__).resolve().parents[1]
 dist=root/'dist'
-modules=['parameters.js','math.js','road.js','estimator.js','simple-kf.js','world.js','simulation.js','worker.js']
+modules=['parameters.js','math.js','road.js','estimator.js','simple-kf.js','world.js','exit-callout.js','simulation.js','worker.js']
 worker='\n'.join(re.sub(r'^import .*?;\s*$', '', (dist/name).read_text(), flags=re.M).replace('export ','') for name in modules)
 config=re.search(r'export const CONFIG=(.*?);', (dist/'simulation.js').read_text()).group(1)
 parameter_source=(dist/'parameters.js').read_text().replace('export ','')
