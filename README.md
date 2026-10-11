@@ -1,45 +1,45 @@
 # Through the Tunnel · Simulation Lab
 
-Tarayıcıda çalışan, bağımlılıksız ilk sürüm. Tek araç / tek şerit / çatalsız yol. Üç geometri: düz, tek viraj ve S. Truth, Approach A, Approach B ve Approach C uygulanır. PDF’teki tüm platform/altyapı modüllerinin eksiksiz uygulaması değildir; kapsam tek şeritli ve çatalsız yolda konum kestirimidir; iç çıkış bildirimi dahil değildir.
+A dependency-free, browser-based simulator for vehicle positioning during a GNSS outage. It models one vehicle on a single-lane road without junctions, with three geometries: straight, single curve, and S-shaped. Ground truth and Approaches A, B, and C are implemented. The scope is position estimation along a known road; it does not implement every platform or infrastructure module described in the solution document, including in-tunnel exit notifications.
 
-## Canlı demo
+## Live demo
 
-**[Simülatörü tarayıcıda aç](https://mertozerdem.github.io/through-the-tunnel-simulator/)** — kurulum gerektirmez.
+**[Open the simulator](https://mertozerdem.github.io/through-the-tunnel-simulator/)** — no installation required.
 
-## Çalıştırma
+## Running locally
 
-`Tunnel-Simulator.html` tek dosyalık sürümünü doğrudan modern bir tarayıcıda açabilirsiniz. İçerik ve hesaplama Worker’ı dosyaya gömülüdür; sunucu veya kurulum gerekmez. Modüler geliştirme sürümü için aşağıdaki adımları kullanın.
+Open the standalone `Tunnel-Simulator.html` file directly in a modern browser. The interface and computation Worker are embedded in the file, so no server or installation is needed. For the modular development version, follow the steps below.
 
-Python 3 ile proje dizininde:
+From the project directory, using Python 3:
 
 ```sh
 python3 -m http.server 4173 --directory dist
 ```
 
-http://localhost:4173 adresini açın. ES modülleri ve Worker nedeniyle index.html dosyasını file:// ile açmayın. Kurulum veya build adımı yoktur. Yazı tipleri Google Fonts’tan isteğe bağlı yüklenir; ağ yoksa sistem yazı tipleri kullanılır.
+Open http://localhost:4173. The modular `index.html` uses ES modules and a Worker, so it must be served over HTTP rather than opened through `file://`. No installation or build step is required. Fonts are optionally loaded from Google Fonts; system fonts are used when the network is unavailable.
 
-Testler Node.js 18+ ile:
+Run tests with Node.js 18+:
 
 ```sh
 node --test tests/*.test.js
 ```
 
-## Görünen model adları
+## Model names and display order
 
-Arayüzde gösterim sırası: Gerçek araç → Sabit hız (A) → İvme takibi · Kalman (C) → Gelişmiş sensör füzyonu · IMM-EKF (B). Kartlar, grafik çizim sırası, legend ve özet aynı sıradadır. Sayısal motor, renkler ve A/B/C veri anahtarları korunur; CSV sütunları A/C/B sırasındadır, JSON model adlarını ve sırasını ayrıca taşır. Sıra karmaşıklık artışını anlatır; her koşuda aynı hata sıralamasını garanti etmez.
+The interface presents the models in this order: **Actual vehicle → Constant speed (A) → Acceleration tracking · Kalman (C) → Advanced sensor fusion · IMM-EKF (B)**. Cards, chart layers, legends, and summaries follow the same order. The numerical engine, colors, and A/B/C data keys are preserved. CSV model columns use A/C/B order; JSON exports also include the display names and order. This progression represents increasing model complexity, not a guaranteed ranking of accuracy in every run.
 
-## Kullanım
+## Usage
 
-Masaüstü uygulamasıdır (minimum yerleşim genişliği 1120 px). Mobil optimizasyon yapılmaz. Hız ve tünel uzunluğu slider’ları üstteki “Deneme kontrolleri” panelindedir; panel sayfayla birlikte kayar.
+The simulator is designed for desktop use, with a minimum layout width of 1120 px. The speed and tunnel-length sliders are in the **Experiment controls** panel at the top, which scrolls with the page.
 
-- **Hedef hız, 30–110 km/h:** Başlangıçta seçildiğinde yeni koşunun seyir hızını belirler. Zaman ilerledikten sonra değiştirilirse mevcut konum ve geçmiş korunur; araç jerk/ivme sınırlarıyla yavaşlar veya hızlanır. Gerçek hız hedefin yanında gösterilir. Canlı komut, o andan sonraki otomatik yavaşlama/durma profilinin yerini alır.
-- **Tünel uzunluğu, 500–5000 m:** Geometriyi yeniden ölçekler; aynı seed ve slider’da seçili hızla zaman sıfırdan başlayan yeni koşu üretir. Yol tipi ve sürüş profili değişiklikleri de hız komutlarını temizleyerek yeni koşu üretir. Telefon, harita, seed ve teknik parametre değişiklikleri başlangıç hızı ve zamanlanmış canlı hız komutlarını koruyarak aynı deneyin yeni koşusunu üretir.
-- **Yeni koşu:** Canlı komutları siler, seçili hız ve otomatik sürüş profiliyle başa döner. **Başa dön (↺):** Aynı kaydı, canlı hız komutları dahil, yeniden izlemek içindir.
+- **Target speed, 30–110 km/h:** Sets the cruising speed of a new run. Changing it during a run preserves the current position and history while the vehicle accelerates or slows down within acceleration and jerk limits. Actual speed is displayed beside the target. A live command replaces the remaining automatic slowdown or stop profile.
+- **Tunnel length, 500–5000 m:** Rescales the geometry and starts a new run from time zero with the same seed and selected speed. Changing the road geometry or driving profile also starts a new run and clears live speed commands. Changing phone, map, seed, or technical parameters regenerates the experiment while preserving the initial speed and scheduled live speed commands.
+- **New run:** Clears live commands and restarts with the selected speed and automatic driving profile. **Rewind (↺):** Replays the same recording, including live speed commands.
 
-Başlat/Duraklat, 1×–32× oynatma ve zaman çizelgesinden geri/ileri inceleme desteklenir. Hız komutu oynatma sırasında verildiyse hesaplama tamamlanınca oynatma kaldığı andan devam eder; duraklatılmışken verildiyse duraklatılmış kalır. Geçmiş bir ana dönüp yeni hız verilirse bu andaki ve daha sonraki eski komutlar değiştirilir. Ek parametreler soldaki Sürücü / Wavespeed, Gerçek sensör parametreleri ve B · filtre varsayımları gruplarındadır. Aracı izle görünümü truth aracı takip eder. Legend üzerinden araçlar ve grafik çizgileri gizlenebilir.
+Play/Pause, 1×–32× playback, and timeline scrubbing are supported. When a speed command is issued during playback, playback resumes from the same point after computation finishes; when paused, it remains paused. Scrubbing back and issuing a new speed command replaces existing commands at that time and later. Additional settings are grouped in the left-hand controls for Driver / Wavespeed, actual sensor parameters, and filter assumptions. **Follow vehicle** tracks the ground-truth vehicle. Vehicles and chart lines can be hidden through the legend.
 
-Hız değişiklikleri `{at: saniye, speed: km/h}` olayları olarak tutulur. Web Worker aynı başlangıç, seed ve önceki komutlarla koşuyu yeniden hesaplar; yeni komut bir sonraki 10 Hz çerçevesinde uygulanır. Bu, görünür geçmişi değiştirmeden canlı müdahaleyi mümkün kılar. Hedef hız yalnızca truth sürücü kontrolörüne verilir; A/B bu komutu veya truth konumunu almaz. Filtreler değişimi fiziksel sensör/GNSS kayıtlarından takip eder. Kalibrasyon geçmişi de değişmez. Slider değişikliğinde kısa bir hesaplama beklemesi olabilir.
+Speed changes are stored as `{at: seconds, speed: km/h}` events. A Web Worker recomputes the run using the same initial conditions, seed, and preceding commands; a new command takes effect on the next 10 Hz frame. This enables live intervention without changing the visible history. Target speed is supplied only to the ground-truth driver controller; the estimators do not receive this command or the ground-truth position. They track changes through simulated sensor and GNSS recordings. Calibration history is preserved. Slider changes may cause a brief computation delay.
 
-Grafiklerde dikey kesikli çizgiler canlı komut zamanlarını, hız grafiğindeki gri kesikli çizgi hedef hızı gösterir. Koşu özeti bütün tünel geçişine ait RMSE, en büyük hata, ±50 m içinde kalma ve raporlanan ±2σ kapsamını verir; canlı komut zamanlarını da listeler. CSV ham kestirim, sensör kanalları, `truth_a_mps2` ve `target_speed_kmh` sütunlarını içerir; senaryo JSON’u komutlar dahil ayarları ve özeti saklar.
+Vertical dashed lines mark live command times in the charts; the gray dashed line in the speed chart shows target speed. The run summary reports tunnel-wide RMSE, peak error, the proportion of estimates within ±50 m, and coverage of the reported ±2σ interval. It also lists live command times. CSV exports contain raw estimates, sensor channels, `truth_a_mps2`, and `target_speed_kmh`. Scenario JSON exports preserve settings, commands, and the summary.
 
-**Mülakat için kısa deneme:** Seyir profilinde 80 km/h ve 2 km seçin. Tünelde 30. saniyeye gelin; hedefi 40 km/h yapın. Yaklaşık 20 s sonra A’nın eski hızda ilerlemesini, B’nin frenlemeyi sensörlerden izlemesini tartışın. Sonra hedefi 100 km/h yapıp manevra olasılığını inceleyin. Aynı denemeyi 5 km düz tünelde ve S tünelde, aynı seed ile karşılaştırın.
+**Quick interview experiment:** Select Cruise, 80 km/h, and a 2 km tunnel. At 30 seconds into the tunnel, change the target to 40 km/h. About 20 seconds later, discuss why Constant speed continues at its entry speed while Advanced sensor fusion follows braking through sensor measurements. Then set the target to 100 km/h and inspect the maneuver probability. Repeat with a 5 km straight tunnel and an S-shaped tunnel using the same seed.
