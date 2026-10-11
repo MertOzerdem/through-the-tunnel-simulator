@@ -8,9 +8,7 @@ A dependency-free, browser-based simulator for vehicle positioning during a GNSS
 
 ## Running locally
 
-Open the standalone `Tunnel-Simulator.html` file directly in a modern browser. The interface and computation Worker are embedded in the file, so no server or installation is needed. For the modular development version, follow the steps below.
-
-Prerequisites for the modular version: a working Python 3 installation. Tests additionally require Node.js 18 or newer. Check your versions with `python3 --version` and `node --version`.
+Prerequisites for running locally: a working Python 3 installation. Tests additionally require Node.js 18 or newer. Check your versions with `python3 --version` and `node --version`.
 
 From the project directory, using Python 3:
 
