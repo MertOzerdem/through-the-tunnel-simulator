@@ -10,13 +10,17 @@ A dependency-free, browser-based simulator for vehicle positioning during a GNSS
 
 Open the standalone `Tunnel-Simulator.html` file directly in a modern browser. The interface and computation Worker are embedded in the file, so no server or installation is needed. For the modular development version, follow the steps below.
 
+Prerequisites for the modular version: a working Python 3 installation. Tests additionally require Node.js 18 or newer. Check your versions with `python3 --version` and `node --version`.
+
 From the project directory, using Python 3:
 
 ```sh
 python3 -m http.server 4173 --directory dist
 ```
 
-Open http://localhost:4173. The modular `index.html` uses ES modules and a Worker, so it must be served over HTTP rather than opened through `file://`. No installation or build step is required. Fonts are optionally loaded from Google Fonts; system fonts are used when the network is unavailable.
+Open http://localhost:4173. If port 4173 is already in use, choose another port in the command and URL (for example, 4183). The modular `index.html` uses ES modules and a Worker, so it must be served over HTTP rather than opened through `file://`. No installation or build step is required. Fonts are optionally loaded from Google Fonts; system fonts are used when the network is unavailable.
+
+On macOS, if the system Python reports an Xcode license error, use a separately installed Python 3 or complete the Xcode setup before retrying. If Node reports `bad option: --test`, switch to Node.js 18 or newer.
 
 Run tests with Node.js 18+:
 
