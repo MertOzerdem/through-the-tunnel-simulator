@@ -33,11 +33,12 @@ const signed=v=>(v>=0?'+':'−')+number(Math.abs(v));
 function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
 function setPlaying(v){playing=v;$('playText').textContent=v?'Duraklat':'Başlat';$('playIcon').textContent=v?'Ⅱ':'▶';last=0;}
 function fillRange(el){el.style.setProperty('--fill',`${100*(el.value-el.min)/(el.max-el.min)}%`);}
+function syncTimeline(value=index){for(const id of ['timeline','timelineBottom']){const slider=$(id);slider.value=value;fillRange(slider);}}
 function speedDisplay(value){$('speed').value=value;fillRange($('speed'));$('speedOut').innerHTML=`${number(value/3.6*speedScale(),speedUnit==='m/s'?1:0)} <small>${speedUnit}</small>`;$('speed').setAttribute('aria-valuetext',speedText(value));}
 function busy(live=false){
  setPlaying(false);if(worker){worker.terminate();worker=null;}
  $('loading').classList.remove('hidden');$('loading').querySelector('strong').textContent=live?'Yeni hız uygulanıyor':'Koşu hazırlanıyor';
- $('play').disabled=true;$('timeline').disabled=true;$('reset').disabled=true;$('summaryBtn').disabled=true;
+ $('play').disabled=true;for(const id of ['timeline','timelineBottom'])$(id).disabled=true;$('reset').disabled=true;$('summaryBtn').disabled=true;
 }
 function build(options={}){
  const {keepIndex=0,resume=false,live=false}=options;busy(live);carry=0;
@@ -54,8 +55,8 @@ function build(options={}){
   if(e.data.progress!==undefined)$('progressText').textContent=`Araç, sensörler ve filtreler · %${Math.round(e.data.progress*100)}`;
   if(e.data.data){
    data=e.data.data;playbackRows=[...data.calibrationRows,...data.rows];const peaks={a:0,b:0,c:0};peakErrors=data.rows.map(r=>{for(const k of modelOrder)peaks[k]=Math.max(peaks[k],Math.abs(r[k].s-r.s));return {...peaks};});$('calibrationInfo').textContent='Kalibrasyon sonunda: '+number(data.calibration.seconds,1)+' s · uygun hız değişimi: '+number(data.calibration.qualifying,0)+' s · Füzyon: '+(data.calibration.ready?'hazır':'sınırlı')+' · Kalman: '+(data.calibration.c.ready?'hazır':'sınırlı');index=Math.min(keepIndex,playRows().length-1);liveContext=null;
-   $('loading').classList.add('hidden');$('play').disabled=false;$('timeline').disabled=false;$('reset').disabled=false;$('summaryBtn').disabled=false;
-   $('timeline').max=playRows().length-1;$('endTime').textContent=time(playTime(data.duration));$('outageLabel').textContent=`GNSS kesintisi · ${number(data.exitTime-data.entryTime,0)} s`;
+   $('loading').classList.add('hidden');$('play').disabled=false;for(const id of ['timeline','timelineBottom'])$(id).disabled=false;$('reset').disabled=false;$('summaryBtn').disabled=false;
+   for(const id of ['timeline','timelineBottom'])$(id).max=playRows().length-1;$('endTime').textContent=time(playTime(data.duration));const outageLabel=`GNSS kesintisi · ${number(data.exitTime-data.entryTime,0)} s`;$('outageLabel').textContent=outageLabel;$('outageLabelBottom').textContent=outageLabel;
    $('cReadiness').textContent='Kalman kalibrasyonu: '+(data.calibration.c.ready?'hazır':'sınırlı · IMU yerine kıyı')+' · giriş σb '+number(data.calibration.c.sigmaBeta,3)+' m/s²';$('filterReadiness').textContent='Kalibrasyon: '+(data.calibration.ready?'hazır':'sınırlı')+' · M1: '+(data.calibration.m1Enabled?'açık':cfg.useM1?'hazırlık nedeniyle kapalı':'elle kapalı');if(!live){$('changeStatus').className='experimentstatus';$('changeStatus').textContent=cfg.speedChanges.length?'Koşu hazır · kayıtlı canlı hız komutları korunarak yeniden hesaplandı.':'Koşu hazır · aynı seed ile parametrelerin etkisini karşılaştırabilirsin.';}nextWorker.terminate();worker=null;render();if(resume)setPlaying(true);
   }
  };
@@ -85,8 +86,8 @@ $('newSeed').onclick=()=>{cfg.seed=Math.floor(Math.random()*999999)+1;$('seed').
 $('freshRun').onclick=change;
 $('speedUnit').onchange=()=>{speedUnit=$('speedUnit').value;document.querySelectorAll('[data-speed-unit]').forEach(el=>el.textContent=speedUnit);$('speedMin').textContent=speedText(30);$('speedMax').textContent=speedText(110);speedDisplay(Number($('speed').value));$('profile').options[1].textContent=`Yavaşla · ${speedText(cfg.speed)} → ${speedText(Math.min(cfg.speed,50))}`;if(cfg.speedChanges.length){const c=cfg.speedChanges.at(-1);$('changeStatus').textContent=`${time(c.at)} · hedef ${speedText(c.speed)}. Araç bu noktadan itibaren uyum sağlar; kalan otomatik profilin yerini alır.`;}render();};
 $('play').onclick=()=>{if(!data||worker)return;if(index>=playRows().length-1)index=0;setPlaying(!playing);render();};
-$('reset').onclick=()=>{setPlaying(false);index=0;carry=0;$('timeline').value=0;render();};
-$('timeline').oninput=()=>{setPlaying(false);index=Number($('timeline').value);render();};for(const id of ['showTruth','showA','showB','showC'])$(id).onchange=render;
+$('reset').onclick=()=>{setPlaying(false);index=0;carry=0;syncTimeline(0);render();};
+for(const id of ['timeline','timelineBottom'])$(id).oninput=()=>{setPlaying(false);index=Number($(id).value);render();};for(const id of ['showTruth','showA','showB','showC'])$(id).onchange=render;
 function view(v){chase=v;$('wholeView').classList.toggle('active',!v);$('chaseView').classList.toggle('active',v);$('wholeView').setAttribute('aria-pressed',!v);$('chaseView').setAttribute('aria-pressed',v);render();}$('wholeView').onclick=()=>view(false);$('chaseView').onclick=()=>view(true);
 $('aboutBtn').onclick=()=>$('aboutDialog').showModal();document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
 function surface(id){const canvas=$(id),r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);if(canvas.width!==Math.round(r.width*dpr)||canvas.height!==Math.round(r.height*dpr)){canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);}const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);return{ctx,w:r.width,h:r.height};}
@@ -125,7 +126,7 @@ function chartDraw(id,kind,row){const{ctx:c,w,h}=surface(id),pad={l:43,r:15,t:15
 }
 
 function renderCalibration(r){
- renderCallouts(r);$('currentTime').textContent=time(playTime(r.t));$('timeline').value=index;fillRange($('timeline'));
+ renderCallouts(r);$('currentTime').textContent=time(playTime(r.t));syncTimeline(index);
  $('truthV').textContent=number(r.v*speedScale());$('actualSpeed').textContent=number(r.v*speedScale());$('truthS').textContent=number(r.s,0)+' m';$('currentTarget').textContent=speedText(r.target);
  for(const k of modelOrder)for(const suffix of ['Error','V','Sigma','Peak'])$(k+suffix).textContent='—';
  $('phase').className='phase open';$('phase').textContent='Kalibrasyon sürüşü';
@@ -135,7 +136,7 @@ function renderCalibration(r){
  for(const id of ['errorCanvas','speedCanvas']){const{ctx:c,w,h}=surface(id);c.fillStyle='#7f9685';c.font='12px sans-serif';c.fillText(translate('Kalibrasyon tamamlanınca grafikler başlar'),45,h/2);}
 }
 
-function render(){if(!data)return;const calibrating=index<data.calibrationRows.length;$('rate').value=calibrating?'128':String(normalPlaybackRate);$('rate').disabled=calibrating;$('skipCalibration').disabled=index>=data.calibrationRows.length;const r=playRows()[index];if(r.phase==='calibration'){renderCalibration(r);return;}renderCallouts(r);$('currentTime').textContent=time(playTime(r.t));$('timeline').value=index;fillRange($('timeline'));$('truthV').textContent=number(r.v*speedScale());$('actualSpeed').textContent=number(r.v*speedScale());$('currentTarget').textContent=speedText(r.target);if(!liveContext){const command=cfg.speedChanges.filter(e=>e.at<=Math.round(r.t*10)/10).at(-1);speedDisplay(command?.speed??cfg.speed);}$('truthS').textContent=number(r.s,0)+' m';for(const key of ['a','b','c']){$(key+'Error').textContent=signed(r[key].s-r.s);$(key+'V').textContent=number(r[key].v*speedScale())+' '+speedUnit;$(key+'Sigma').textContent='σ '+number(r[key].sigma)+' m';$(key+'Peak').textContent=number(peakErrors[index-data.calibrationRows.length][key])+' m';}
+function render(){if(!data)return;const calibrating=index<data.calibrationRows.length;$('rate').value=calibrating?'128':String(normalPlaybackRate);$('rate').disabled=calibrating;$('skipCalibration').disabled=index>=data.calibrationRows.length;const r=playRows()[index];if(r.phase==='calibration'){renderCalibration(r);return;}renderCallouts(r);$('currentTime').textContent=time(playTime(r.t));syncTimeline(index);$('truthV').textContent=number(r.v*speedScale());$('actualSpeed').textContent=number(r.v*speedScale());$('currentTarget').textContent=speedText(r.target);if(!liveContext){const command=cfg.speedChanges.filter(e=>e.at<=Math.round(r.t*10)/10).at(-1);speedDisplay(command?.speed??cfg.speed);}$('truthS').textContent=number(r.s,0)+' m';for(const key of ['a','b','c']){$(key+'Error').textContent=signed(r[key].s-r.s);$(key+'V').textContent=number(r[key].v*speedScale())+' '+speedUnit;$(key+'Sigma').textContent='σ '+number(r[key].sigma)+' m';$(key+'Peak').textContent=number(peakErrors[index-data.calibrationRows.length][key])+' m';}
  const phases={open:'Açık gökyüzü',degraded:'GNSS zayıflıyor',tunnel:'GNSS kesintisi',recovery:'GNSS toparlanıyor'};$('phase').className='phase '+r.phase;$('phase').innerHTML=`<span></span>${phases[r.phase]}`;
  $('mapNote').textContent=r.phase==='tunnel'?'Uydu yok · Sabit hız → İvme takibi → Sensör füzyonu':r.phase==='recovery'?'GNSS geri döndü · ilk fix’ler doğrulanıyor':r.s>cfg.length?'GNSS aktif · kestirimler düzeltiliyor':'GNSS aktif · tünele yaklaşılıyor';
  $('modeText').textContent=r.b.stationary?'Standstill':r.s>=0&&!data.calibration.m1Enabled?'M1 kapalı':r.b.mu>.5?'Manevra':'Seyir';$('modeFill').style.width=(r.b.mu*100)+'%';$('modePercent').textContent='Manevra %'+Math.round(r.b.mu*100);$('biasText').textContent='β '+number(r.b.beta,3)+' m/s²';$('gateText').textContent=r.lastGate;$('cState').textContent=!r.c.imuEnabled?'Kalibrasyon sınırlı · kıyı':r.c.stationary?'Duruş / ZUPT':'IMU ile ilerleme';$('cBias').textContent='b '+number(r.c.beta,3)+' m/s²';mapDraw(r);chartDraw('errorCanvas','error',r);chartDraw('speedCanvas','speed',r);
