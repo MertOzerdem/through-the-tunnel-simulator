@@ -1,5 +1,5 @@
 import {translate,locale,language,initLanguage} from './i18n.js';
-import {PARAMETERS} from './parameters.js';
+import {PARAMETERS,physicalParameterReadings} from './parameters.js';
 import {CONFIG} from './simulation.js';
 const $=id=>document.getElementById(id),colors={truth:'#219874',a:'#cf8b28',b:'#7765cf',c:'#287fa6'},names={s:'S biçimli tünel',curve:'Tek virajlı tünel',straight:'Düz tünel'};
 const modelOrder=['a','c','b'],modelNames={a:'Sabit hız',c:'İvme takibi · Kalman',b:'Gelişmiş sensör füzyonu · IMM-EKF'};
@@ -13,15 +13,27 @@ const time=t=>`${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60)
 const number=(v,n=1)=>v.toLocaleString(locale(),{minimumFractionDigits:n,maximumFractionDigits:n});
 const speedScale=()=>speedUnit==='m/s'?1:3.6;
 const speedText=kmh=>number(kmh/3.6*speedScale(),speedUnit==='m/s'?1:0)+' '+speedUnit;
+function formatPhysicalValue(reading){
+ if(!reading.scientific||reading.value===0)return number(reading.value,reading.scientific?0:reading.digits);
+ const [mantissa,exponent]=reading.value.toExponential(2).split('e'),superscript={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+ return number(Number(mantissa),2)+' × 10'+String(Number(exponent)).split('').map(c=>superscript[c]).join('');
+}
 function syncParameters(){
- for(const p of PARAMETERS){const el=$(p.key);el.value=cfg[p.key];el.disabled=!!p.wave&&cfg.profile!=='wavespeed';fillRange(el);$(p.key+'Value').textContent=number(cfg[p.key],p.digits)+' '+p.unit;}
+ for(const p of PARAMETERS){
+  const el=$(p.key),output=$(p.key+'Value'),readings=physicalParameterReadings(p.key,cfg);
+  el.value=cfg[p.key];el.disabled=!!p.wave&&cfg.profile!=='wavespeed';fillRange(el);
+  output.classList.toggle('physicalValue',!!readings);output.closest('.rangefield').classList.toggle('physicalParameter',!!readings);
+  if(readings){
+   const values=readings.map(r=>({...r,text:formatPhysicalValue(r)}));
+   output.innerHTML=values.map(r=>`<span class="physicalReading"><span>${translate(r.label)}</span><strong>${r.text} ${r.unit}</strong></span>`).join('');
+   el.setAttribute('aria-valuetext',values.map(r=>`${translate(r.label)}: ${r.text} ${r.unit}`).join('; '));
+  }else{output.textContent=number(cfg[p.key],p.digits)+' '+p.unit;el.setAttribute('aria-valuetext',output.textContent);}
+ }
  for(const key of ['useM1','useM5','useM6','useM7','useCZupt'])$(key).checked=cfg[key];$('nisGate').value=cfg.nisGate;
- const q=(cfg.phone==='good'?5e-6:cfg.phone==='poor'?6e-5:1.5e-5)*cfg.qbetaScale;
- $('qbetaValue').textContent='Etkin qβ = '+q.toExponential(2)+' m²/s⁵';
 }
 function setupParameters(){
  const groups=[['calibration','Tünel öncesi kalibrasyon'],['driver','Sürücü / Wavespeed'],['sensor','Gerçek sensör parametreleri'],['cfilter','İvme takibi · Kalman'],['filter','Gelişmiş sensör füzyonu · IMM-EKF']];
- $('parameterGroups').innerHTML=groups.map(([group,label])=>`<details class="advanced parameterGroup" id="${group}Parameters" ${group==='calibration'?'open':''}><summary>${label}<span>+</span></summary><div class="advancedbody">${PARAMETERS.filter(p=>p.group===group).map(p=>`<div class="rangefield"><label for="${p.key}">${p.label}<output id="${p.key}Value"></output></label><input type="range" id="${p.key}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.value}" aria-describedby="${p.key}Help"><p class="parameterHelp" id="${p.key}Help">${p.help}</p></div>`).join('')}${group==='calibration'?'<p id="calibrationInfo" class="parameterHelp"></p><button id="skipCalibration" class="textbutton">Kalibrasyonu geç →</button>':''}${group==='filter'?`<p id="qbetaValue" class="parameterHelp"></p><label class="fieldlabel" for="nisGate">Füzyon · NIS kapısı</label><select id="nisGate"><option value="3.84">95% · 3.84 (sıkı)</option><option value="6.63" selected>99% · 6.63</option><option value="10.83">99.9% · 10.83 (gevşek)</option></select><p class="parameterHelp">Daha büyük eşik daha fazla yeniliği kabul eder; ölçüm kalitesi kontrolleri devam eder.</p><div class="measurementToggles">${[['useM1','M1 · IMU ivmesi'],['useM5','M5 · Harita yönü'],['useM6','M6 · Duruş / ZUPT'],['useM7','M7 · Çıkış portalı']].map(([key,label])=>`<label><input type="checkbox" id="${key}" checked>${label}</label>`).join('')}</div><p class="parameterHelp" id="filterReadiness">M1 başlangıç kalibrasyonuna bağlıdır.</p>`:group==='cfilter'?`<label class="fieldlabel"><input type="checkbox" id="useCZupt" checked> Kalman · Duruş / ZUPT</label><p class="parameterHelp">Düşük tahmini hız + düşük hız belirsizliği + 0.5 s sakin IMU gerekir. Duruşu kaçırabilir; sakin sensör tek başına duruş değildir.</p><p class="parameterHelp" id="cReadiness">Kalman modeli kendi GNSS / IMU geçmişiyle kalibre edilir.</p>`:''}</div></details>`).join('');
+ $('parameterGroups').innerHTML=groups.map(([group,label])=>`<details class="advanced parameterGroup" id="${group}Parameters" ${group==='calibration'?'open':''}><summary>${label}<span>+</span></summary><div class="advancedbody">${PARAMETERS.filter(p=>p.group===group).map(p=>`<div class="rangefield"><label for="${p.key}">${p.label}<output id="${p.key}Value"></output></label><input type="range" id="${p.key}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.value}" aria-describedby="${p.key}Help"><p class="parameterHelp" id="${p.key}Help">${p.help}</p></div>`).join('')}${group==='calibration'?'<p id="calibrationInfo" class="parameterHelp"></p><button id="skipCalibration" class="textbutton">Kalibrasyonu geç →</button>':''}${group==='filter'?`<label class="fieldlabel" for="nisGate">Füzyon · NIS kapısı</label><select id="nisGate"><option value="3.84">95% · 3.84 (sıkı)</option><option value="6.63" selected>99% · 6.63</option><option value="10.83">99.9% · 10.83 (gevşek)</option></select><p class="parameterHelp">Daha büyük eşik daha fazla yeniliği kabul eder; ölçüm kalitesi kontrolleri devam eder.</p><div class="measurementToggles">${[['useM1','M1 · IMU ivmesi'],['useM5','M5 · Harita yönü'],['useM6','M6 · Duruş / ZUPT'],['useM7','M7 · Çıkış portalı']].map(([key,label])=>`<label><input type="checkbox" id="${key}" checked>${label}</label>`).join('')}</div><p class="parameterHelp" id="filterReadiness">M1 başlangıç kalibrasyonuna bağlıdır.</p>`:group==='cfilter'?`<label class="fieldlabel"><input type="checkbox" id="useCZupt" checked> Kalman · Duruş / ZUPT</label><p class="parameterHelp">Düşük tahmini hız + düşük hız belirsizliği + 0.5 s sakin IMU gerekir. Duruşu kaçırabilir; sakin sensör tek başına duruş değildir.</p><p class="parameterHelp" id="cReadiness">Kalman modeli kendi GNSS / IMU geçmişiyle kalibre edilir.</p>`:''}</div></details>`).join('');
  for(const p of PARAMETERS)$(p.key).oninput=()=>{cfg[p.key]=Number($(p.key).value);syncParameters();change({preserveDrive:true});};
  for(const key of ['useM1','useM5','useM6','useM7','useCZupt'])$(key).onchange=()=>{cfg[key]=$(key).checked;change({preserveDrive:true});};
  $('nisGate').onchange=()=>{cfg.nisGate=Number($('nisGate').value);change({preserveDrive:true});};
@@ -80,7 +92,7 @@ $('speed').oninput=()=>{
  $('changeStatus').className='experimentstatus manual';$('changeStatus').textContent=`${time(playTime(at))} · hedef ${speedText(speed)}. Araç bu noktadan itibaren uyum sağlar; kalan otomatik profilin yerini alır.`;
  debounce=setTimeout(()=>build({...liveContext}),220);
 };
-for(const id of ['profile','phone','map'])$(id).onchange=()=>{cfg[id]=$(id).value;if(id==='profile'&&cfg.profile==='wavespeed')$('driverParameters').open=true;change({preserveDrive:id!=='profile'});};
+for(const id of ['profile','phone','map'])$(id).onchange=()=>{cfg[id]=$(id).value;syncParameters();if(id==='profile'&&cfg.profile==='wavespeed')$('driverParameters').open=true;change({preserveDrive:id!=='profile'});};
 $('seed').onchange=()=>{cfg.seed=Math.max(1,Math.min(999999,Math.round(Number($('seed').value)||42)));$('seed').value=cfg.seed;change({preserveDrive:true});};
 $('newSeed').onclick=()=>{cfg.seed=Math.floor(Math.random()*999999)+1;$('seed').value=cfg.seed;change({preserveDrive:true});};
 $('freshRun').onclick=change;

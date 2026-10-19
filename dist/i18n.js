@@ -1,6 +1,20 @@
 // Turkish originals are retained; English is the default presentation language.
 export let language='en';
 export const EN={
+ "IMU · beyaz gürültü σ": "IMU · white noise σ",
+ "IMU · bias drift’i": "IMU · bias drift",
+ "Füzyon · bias süreç gürültüsü qβ": "Fusion · bias process noise qβ",
+ "Kalman · bias süreç gürültüsü qᵦ": "Kalman · bias process noise qᵦ",
+ "İvmeölçer X/Y · σ": "Accelerometer X/Y · σ",
+ "İvmeölçer Z · σ": "Accelerometer Z · σ",
+ "Duruşta · σ": "At rest · σ",
+ "Jiroskop · σ": "Gyroscope · σ",
+ "İvme bias random walk": "Accel bias random walk",
+ "Gyro bias · durağan σ": "Gyro bias · stationary σ",
+ "100 Hz ham telefon örneklerinde eksen başına beyaz gürültü standart sapması. Duruşta tüm ivmeölçer eksenleri aynı σ değerini kullanır; filtre R’si ayrı ayarlanır.": "Per-axis white noise standard deviation in raw 100 Hz phone samples. At rest, all accelerometer axes use the same σ; filter R is set separately.",
+ "İvme bias’ı random walk genliğiyle büyür. Gyro bias’ı 300 s zaman sabitli Gauss–Markov sürecidir; gösterilen σ durağan dağılıma aittir. Bunlar anlık bias ölçümleri değildir.": "Accelerometer bias grows with the random walk amplitude. Gyro bias follows a Gauss–Markov process with a 300 s time constant; σ describes its stationary distribution. These are model parameters, not instantaneous bias readings.",
+ "Filtrenin bias süreç gürültüsü yoğunluğu. Bias kovaryansına her adımda qβ × Δt eklenir. Telefon seçimine göre güncellenir; gerçek sensör drift’inden bağımsızdır.": "Filter bias process noise intensity. Each step adds qβ × Δt to the bias covariance. Updates with the phone preset; independent of actual sensor drift.",
+ "Kalman filtresinin bias süreç gürültüsü yoğunluğu. Bias kovaryansına her adımda qᵦ × Δt eklenir. Düz tünelde yeni ölçüm yoksa bias öğrenilemez.": "Kalman bias process noise intensity. Each step adds qᵦ × Δt to the bias covariance. Bias cannot be observed in a straight tunnel without new measurements.",
 "Çıkış anonsu":"Exit callout",
 "Anons eşiği":"Callout threshold",
 "Çıkış konumu":"Exit position",

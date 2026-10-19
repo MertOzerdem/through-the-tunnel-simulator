@@ -18,6 +18,7 @@ body{min-width:1120px}.workspace{grid-template-columns:310px minmax(0,1fr)}.setu
 .metricpeak{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:10px;color:#7e9284}.metricpeak strong{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap}
 
 .calloutpanel{margin-top:16px;padding:18px 20px}.calloutpanel h2{font-size:16px}.calloutpanel p{font-size:11px;color:#7e9284;line-height:1.6}.calloutpanel table{width:100%;border-collapse:collapse;font-size:11px}.calloutpanel th,.calloutpanel td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
-
 .timelinepanel{margin-top:14px}.timelinepanel .timelinewrap{padding:0 25px 12px}.timelinepanel input[type=range]{margin-top:10px;margin-bottom:10px}
 .calloutpanel{padding:0}.calloutdetails>summary{display:flex;align-items:center;justify-content:space-between;padding:17px 20px}.calloutdetails>summary h2{font-size:15px}.callouttoggle{font-size:17px;color:#8c9f92;transition:transform .15s}.calloutdetails[open] .callouttoggle{transform:rotate(45deg)}.calloutcontent{padding:0 20px 17px}.calloutcontent p{margin:0 0 10px}
+
+.parameterGroup .physicalParameter>label{display:block}.parameterGroup output.physicalValue{display:grid;gap:6px;margin:9px 0 0;padding:9px;border:1px solid var(--line);border-radius:6px;background:#f7faf7;white-space:normal}.physicalReading{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 8px}.physicalReading>span{font-family:var(--body);font-size:9px;color:#718577;font-weight:400}.physicalReading>strong{font-family:var(--mono);font-size:10px;font-weight:500;white-space:nowrap;color:var(--ink)}
