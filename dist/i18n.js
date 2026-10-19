@@ -1,6 +1,11 @@
 // Turkish originals are retained; English is the default presentation language.
 export let language='en';
 export const EN={
+ "Hazırlanıyor": "Preparing",
+ "Kalibre ediliyor": "Calibrating",
+ "Hazır": "Ready",
+ "Hazır değil": "Not ready",
+ "Tünel girişindeki kalibrasyon kontrolünün sonucudur.": "Result of the calibration readiness check at tunnel entry.",
  "IMU · beyaz gürültü σ": "IMU · white noise σ",
  "IMU · bias drift’i": "IMU · bias drift",
  "Füzyon · bias süreç gürültüsü qβ": "Fusion · bias process noise qβ",
